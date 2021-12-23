@@ -1,0 +1,8 @@
+{
+  "binary_download_url_pattern": "https://github.com/cube2222/octosql-plugin-postgres/releases/download/{{version}}/octosql-plugin-mysql_{{version}}_{{os}}_{{arch}}.tar.gz",
+  "versions": [
+    {
+      "number": "0.1.0"
+    }
+  ]
+}
