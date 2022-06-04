@@ -16,6 +16,7 @@ The available configuration variables are:
 - user
 - password
 - database
+- schema
 
 An example octosql.yml file would be:
 ```yaml
@@ -26,6 +27,7 @@ databases:
       host: localhost
       port: 3306
       database: mydatabase
+      schema: public
       user: myuser
       password: mypassword
 ```
