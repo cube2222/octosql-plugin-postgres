@@ -21,6 +21,7 @@ type Config struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	Database string `yaml:"database"`
+	Schema   string `yaml:"schema"`
 }
 
 func (c *Config) Validate() error {
@@ -74,13 +75,17 @@ func (d *Database) ListTables(ctx context.Context) ([]string, error) {
 	panic("implement me")
 }
 
-func (d *Database) GetTable(ctx context.Context, name string) (physical.DatasourceImplementation, physical.Schema, error) {
+func (d *Database) GetTable(ctx context.Context, name string, options map[string]string) (physical.DatasourceImplementation, physical.Schema, error) {
 	db, err := connect(d.Config)
 	if err != nil {
 		return nil, physical.Schema{}, fmt.Errorf("couldn't connect to database: %w", err)
 	}
 
-	rows, err := db.QueryEx(ctx, "SELECT column_name, udt_name, is_nullable FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position", nil, name)
+	if d.Config.Schema == "" {
+		return nil, physical.Schema{}, fmt.Errorf("`schema` configuration setting is required")
+	}
+
+	rows, err := db.QueryEx(ctx, "SELECT column_name, udt_name, is_nullable FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2 ORDER BY ordinal_position", nil, name, d.Config.Schema)
 	if err != nil {
 		return nil, physical.Schema{}, fmt.Errorf("couldn't describe table: %w", err)
 	}
@@ -117,8 +122,9 @@ func (d *Database) GetTable(ctx context.Context, name string) (physical.Datasour
 			table:  name,
 		},
 		physical.Schema{
-			Fields:    fields,
-			TimeField: -1,
+			Fields:        fields,
+			TimeField:     -1,
+			NoRetractions: true,
 		},
 		nil
 }

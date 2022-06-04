@@ -43,13 +43,18 @@ func (impl *impl) Materialize(ctx context.Context, env physical.Environment, sch
 		}
 		executionPlaceholderExprs[i] = expr
 	}
+	placeholderExprTypes := make([]octosql.Type, len(placeholderExpressions))
+	for i := range placeholderExpressions {
+		placeholderExprTypes[i] = placeholderExpressions[i].Type
+	}
 
 	return &DatasourceExecuting{
-		fields:           schema.Fields,
-		table:            impl.table,
-		placeholderExprs: executionPlaceholderExprs,
-		db:               db,
-		stmt:             stmt,
+		fields:               schema.Fields,
+		table:                impl.table,
+		placeholderExprTypes: placeholderExprTypes,
+		placeholderExprs:     executionPlaceholderExprs,
+		db:                   db,
+		stmt:                 stmt,
 	}, nil
 }
 
